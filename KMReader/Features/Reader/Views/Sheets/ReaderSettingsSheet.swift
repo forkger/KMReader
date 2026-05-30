@@ -6,8 +6,9 @@
 import SwiftUI
 
 struct ReaderSettingsSheet: View {
-  // Session-specific bindings (not persisted until reader closes)
+  // Bindings owned by the reader, which controls persistence
   @Binding var readingDirection: ReadingDirection
+  @Binding var panelModeEnabled: Bool
 
   // Persisted settings (via @AppStorage)
   @AppStorage("readerBackground") private var readerBackground: ReaderBackground = .system
@@ -44,7 +45,6 @@ struct ReaderSettingsSheet: View {
   private var showProgressBarWhileReading: Bool =
     AppConfig.showDivinaProgressBarWhileReading
   @AppStorage("divinaPreloadProfile") private var divinaPreloadProfile: ReaderPreloadProfile = .balanced
-  @AppStorage("panelMode") private var panelModeEnabled: Bool = false
 
   private var isWebtoonDirection: Bool {
     readingDirection == .webtoon

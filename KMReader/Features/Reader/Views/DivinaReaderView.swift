@@ -45,7 +45,7 @@ struct DivinaReaderView: View {
   @AppStorage("doubleTapZoomMode") private var doubleTapZoomMode: DoubleTapZoomMode = .fast
   @AppStorage("shakeToOpenLiveText") private var shakeToOpenLiveText: Bool = false
   @AppStorage("divinaPreloadProfile") private var divinaPreloadProfile: ReaderPreloadProfile = .balanced
-  @AppStorage("panelMode") private var panelModeEnabled: Bool = false
+  @State private var panelModeEnabled: Bool = false
 
   @State private var readingDirection: ReadingDirection
   @State private var pageLayout: PageLayout
@@ -122,6 +122,7 @@ struct DivinaReaderView: View {
     self._pageLayout = State(initialValue: AppConfig.pageLayout)
     self._isolateCoverPage = State(initialValue: AppConfig.isolateCoverPage)
     self._splitWidePageMode = State(initialValue: AppConfig.splitWidePageMode)
+    self._panelModeEnabled = State(initialValue: AppConfig.panelMode(for: book.id))
     self._viewModel = State(
       initialValue: ReaderViewModel(
         isolateCoverPage: AppConfig.isolateCoverPage,
@@ -357,7 +358,7 @@ struct DivinaReaderView: View {
     splitWidePageMode = AppConfig.splitWidePageMode
     viewModel.updateSplitWidePageMode(splitWidePageMode)
     readingDirection = AppConfig.defaultReadingDirection
-    panelModeEnabled = AppConfig.panelMode
+    panelModeEnabled = AppConfig.panelMode(for: currentBookId)
   }
 
   private func screenKey(screenSize: CGSize) -> String {
@@ -616,8 +617,11 @@ struct DivinaReaderView: View {
         }
       )
     }
+    .onChange(of: panelModeEnabled) {
+      AppConfig.setPanelMode(panelModeEnabled, for: currentBookId)
+    }
     .sheet(isPresented: $showingReaderSettingsSheet) {
-      ReaderSettingsSheet(readingDirection: $readingDirection)
+      ReaderSettingsSheet(readingDirection: $readingDirection, panelModeEnabled: $panelModeEnabled)
     }
     .readerDetailSheet(
       isPresented: $showingDetailSheet,
