@@ -45,6 +45,7 @@ struct DivinaReaderView: View {
   @AppStorage("doubleTapZoomMode") private var doubleTapZoomMode: DoubleTapZoomMode = .fast
   @AppStorage("shakeToOpenLiveText") private var shakeToOpenLiveText: Bool = false
   @AppStorage("divinaPreloadProfile") private var divinaPreloadProfile: ReaderPreloadProfile = .balanced
+  @AppStorage("panelMode") private var panelModeEnabled: Bool = false
 
   @State private var readingDirection: ReadingDirection
   @State private var pageLayout: PageLayout
@@ -150,7 +151,8 @@ struct DivinaReaderView: View {
         && readingDirection != .vertical
         && pageLayout.supportsDualPageOptions,
       doubleTapZoomScale: doubleTapZoomScale,
-      doubleTapZoomMode: doubleTapZoomMode
+      doubleTapZoomMode: doubleTapZoomMode,
+      panelMode: panelModeEnabled && (readingDirection == .ltr || readingDirection == .rtl)
     )
   }
 
@@ -369,6 +371,7 @@ struct DivinaReaderView: View {
       isolateCoverPage.description,
       splitWidePageMode.rawValue,
       String(useDualPage),
+      String(renderConfig.panelMode),
     ].joined(separator: "-")
   }
 
