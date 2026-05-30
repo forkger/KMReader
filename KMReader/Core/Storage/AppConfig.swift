@@ -828,6 +828,11 @@ enum AppConfig {
     }
   }
 
+  static nonisolated var panelMode: Bool {
+    get { UserDefaults.standard.bool(forKey: "panelMode") }
+    set { UserDefaults.standard.set(newValue, forKey: "panelMode") }
+  }
+
   static nonisolated var forceDefaultReadingDirection: Bool {
     get {
       if UserDefaults.standard.object(forKey: "forceDefaultReadingDirection") != nil {

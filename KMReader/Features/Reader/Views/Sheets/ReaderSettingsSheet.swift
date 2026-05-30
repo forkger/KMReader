@@ -44,6 +44,7 @@ struct ReaderSettingsSheet: View {
   private var showProgressBarWhileReading: Bool =
     AppConfig.showDivinaProgressBarWhileReading
   @AppStorage("divinaPreloadProfile") private var divinaPreloadProfile: ReaderPreloadProfile = .balanced
+  @AppStorage("panelMode") private var panelModeEnabled: Bool = false
 
   private var isWebtoonDirection: Bool {
     readingDirection == .webtoon
@@ -174,6 +175,13 @@ struct ReaderSettingsSheet: View {
               }
             }
           #endif
+        }
+
+        Section(header: Text("Panel Mode")) {
+          Toggle(isOn: $panelModeEnabled) {
+            Text("Panel Mode")
+          }
+          .disabled(!(readingDirection == .ltr || readingDirection == .rtl))
         }
 
         Section(header: Text("Performance")) {

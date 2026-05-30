@@ -357,6 +357,7 @@ struct DivinaReaderView: View {
     splitWidePageMode = AppConfig.splitWidePageMode
     viewModel.updateSplitWidePageMode(splitWidePageMode)
     readingDirection = AppConfig.defaultReadingDirection
+    panelModeEnabled = AppConfig.panelMode
   }
 
   private func screenKey(screenSize: CGSize) -> String {
