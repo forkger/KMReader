@@ -50,6 +50,18 @@
       pageContentView.forceResetZoom()
     }
 
+    func zoomToPanelRect(_ rect: PanelRect, animated: Bool) {
+      pageContentView.zoomToPanelRect(rect, animated: animated)
+    }
+
+    func resetPanelZoomToFit(animated: Bool) {
+      pageContentView.resetPanelZoomToFit(animated: animated)
+    }
+
+    func normalizedImagePoint(forContainerPoint point: CGPoint) -> CGPoint? {
+      pageContentView.normalizedImagePoint(forContainerPoint: point)
+    }
+
     override init(frame: CGRect) {
       super.init(frame: frame)
       setupUI()

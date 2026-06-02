@@ -1,4 +1,5 @@
 #if os(iOS) || os(tvOS)
+  import AVFoundation
   import SwiftUI
   import UIKit
 
@@ -215,6 +216,64 @@
       scrollView.setZoomScale(scrollView.minimumZoomScale, animated: false)
       scrollView.contentOffset = .zero
       isUpdatingZoomState = false
+    }
+
+    // MARK: - Panel mode zoom (driven by PanelZoomController via the cover coordinator)
+
+    /// Zoom to a normalized [0,1] page-space panel rect. The rect is mapped through the
+    /// aspect-fit (letterboxed) image frame, not the raw scroll bounds, so the panel is
+    /// framed correctly on letterboxed pages. Lets `scrollViewDidZoom` set `isZoomed`.
+    func zoomToPanelRect(_ panel: PanelRect, animated: Bool) {
+      let container = CGRect(origin: .zero, size: scrollView.bounds.size)
+      guard container.width > 0, container.height > 0 else { return }
+      let fitted = fittedImageRect(in: container)
+      let target = CGRect(
+        x: fitted.minX + panel.x * fitted.width,
+        y: fitted.minY + panel.y * fitted.height,
+        width: max(panel.width * fitted.width, 1),
+        height: max(panel.height * fitted.height, 1)
+      )
+      scrollView.zoom(to: target, animated: animated)
+    }
+
+    /// Reset back to the whole, fitted page.
+    func resetPanelZoomToFit(animated: Bool) {
+      guard scrollView.zoomScale != scrollView.minimumZoomScale else { return }
+      if animated {
+        scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
+      } else {
+        forceResetZoom()
+        if tracksGlobalZoomState, let viewModel, viewModel.isZoomed {
+          viewModel.isZoomed = false
+        }
+      }
+    }
+
+    /// Convert a point in this view's coordinate space to normalized [0,1] image-space
+    /// (through the aspect-fit frame). Points in the letterbox fall outside [0,1].
+    func normalizedImagePoint(forContainerPoint point: CGPoint) -> CGPoint? {
+      let container = CGRect(origin: .zero, size: scrollView.bounds.size)
+      guard container.width > 0, container.height > 0 else { return nil }
+      let fitted = fittedImageRect(in: container)
+      guard fitted.width > 0, fitted.height > 0 else { return nil }
+      return CGPoint(
+        x: (point.x - fitted.minX) / fitted.width,
+        y: (point.y - fitted.minY) / fitted.height
+      )
+    }
+
+    private func fittedImageRect(in container: CGRect) -> CGRect {
+      guard let imageSize = currentDisplayedImageSize(),
+        imageSize.width > 0, imageSize.height > 0
+      else {
+        return container
+      }
+      return AVMakeRect(aspectRatio: imageSize, insideRect: container)
+    }
+
+    private func currentDisplayedImageSize() -> CGSize? {
+      guard let viewModel, let data = currentPageData.first else { return nil }
+      return viewModel.preloadedImage(for: data.pageID)?.size
     }
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {

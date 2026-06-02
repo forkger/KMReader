@@ -80,6 +80,9 @@ struct DivinaReaderView: View {
   @State private var preserveReaderOptions = false
   @State private var usesDualPagePresentation = false
   @State private var webtoonScrollController = WebtoonScrollController()
+  @State private var panelModeController = PanelModeController()
+  @State private var savedPageLayoutBeforeEngage: PageLayout?
+  @State private var savedSplitWideBeforeEngage: SplitWidePageMode?
   @State private var readerSafeAreaTop: CGFloat = 0
   @State private var readerViewHeight: CGFloat = 0
 
@@ -136,7 +139,9 @@ struct DivinaReaderView: View {
   }
 
   var shouldShowControls: Bool {
-    !viewModel.isZoomed && (!viewModel.hasPages || showingControls)
+    // Engaged panel mode is zoomed by definition; controls must stay reachable (A1).
+    (!viewModel.isZoomed || panelModeController.engaged)
+      && (!viewModel.hasPages || showingControls)
   }
 
   private var renderConfig: ReaderRenderConfig {
@@ -152,9 +157,65 @@ struct DivinaReaderView: View {
         && readingDirection != .vertical
         && pageLayout.supportsDualPageOptions,
       doubleTapZoomScale: doubleTapZoomScale,
-      doubleTapZoomMode: doubleTapZoomMode,
-      panelMode: panelModeEnabled && (readingDirection == .ltr || readingDirection == .rtl)
+      doubleTapZoomMode: panelModeActive ? .disabled : doubleTapZoomMode,
+      panelMode: panelModeActive
     )
+  }
+
+  /// Panel mode is offered only for LTR/RTL paged content. When on, the engine's
+  /// double-tap-to-zoom is disabled so the double-tap is free for engage/disengage.
+  private var panelModeActive: Bool {
+    panelModeEnabled && (readingDirection == .ltr || readingDirection == .rtl)
+  }
+
+  /// While engaged, panel mode pins the cover engine so the zoom controller has a single
+  /// target. Render-layer only — never written back to `@AppStorage`.
+  private var effectiveTransitionStyle: PageTransitionStyle {
+    panelModeActive ? .cover : pageTransitionStyle
+  }
+
+  /// Hand the panel module the current page so it can eager-detect (precondition for a
+  /// location-aware engage) and land the cursor after a delegated page turn.
+  private func refreshPanelModeCurrentPage() {
+    guard renderConfig.panelMode else { return }
+    guard let readerPage = viewModel.currentReaderPage,
+      let bookPage = viewModel.page(for: readerPage.id)
+    else { return }
+    let bookId = readerPage.bookId
+    let direction = readingDirection
+    Task {
+      await panelModeController.updateCurrentPage(
+        bookId: bookId, page: bookPage, direction: direction)
+    }
+  }
+
+  /// Force single-page presentation (one coordinate space for the panel rects) for the
+  /// mode's duration — done on enable, NOT on engage, so engaging is pure zoom with no
+  /// view-tree rebuild. Effective-value overrides via `@State`; the `onChange(of:)`
+  /// handlers push to the view model, never to `AppConfig`.
+  private func handlePanelModeEnabledChange() {
+    AppConfig.setPanelMode(panelModeEnabled, for: currentBookId)
+    if panelModeActive {
+      savedPageLayoutBeforeEngage = pageLayout
+      savedSplitWideBeforeEngage = splitWidePageMode
+      if pageLayout != .single { pageLayout = .single }
+      if splitWidePageMode != .none { splitWidePageMode = .none }
+      refreshPanelModeCurrentPage()
+    } else {
+      panelModeController.disengage()
+      if let saved = savedPageLayoutBeforeEngage, pageLayout != saved { pageLayout = saved }
+      if let saved = savedSplitWideBeforeEngage, splitWidePageMode != saved {
+        splitWidePageMode = saved
+      }
+      savedPageLayoutBeforeEngage = nil
+      savedSplitWideBeforeEngage = nil
+    }
+  }
+
+  /// The cover engine reports a panel-mode double-tap here (image-normalized point);
+  /// the controller toggles engage/disengage at that panel.
+  private func handlePanelDoubleTap(_ normalizedPoint: CGPoint?) {
+    panelModeController.toggleEngagement(atNormalizedPoint: normalizedPoint)
   }
 
   private var currentSegmentContext:
@@ -368,7 +429,7 @@ struct DivinaReaderView: View {
   private func readerPresentationKey(useDualPage: Bool) -> String {
     [
       readingDirection.rawValue,
-      pageTransitionStyle.rawValue,
+      effectiveTransitionStyle.rawValue,
       pageLayout.rawValue,
       isolateCoverPage.description,
       splitWidePageMode.rawValue,
@@ -618,7 +679,7 @@ struct DivinaReaderView: View {
       )
     }
     .onChange(of: panelModeEnabled) {
-      AppConfig.setPanelMode(panelModeEnabled, for: currentBookId)
+      handlePanelModeEnabledChange()
     }
     .sheet(isPresented: $showingReaderSettingsSheet) {
       ReaderSettingsSheet(readingDirection: $readingDirection, panelModeEnabled: $panelModeEnabled)
@@ -669,6 +730,7 @@ struct DivinaReaderView: View {
       }
       await loadBook(bookId: currentBookId, preserveReaderOptions: preserveReaderOptions)
       preserveReaderOptions = false
+      refreshPanelModeCurrentPage()
     }
     .onChange(of: currentBook?.id) { _, _ in
       updateHandoff()
@@ -684,8 +746,9 @@ struct DivinaReaderView: View {
       }
     }
     .onDisappear {
+      let currentPageNumber = viewModel.currentPage?.number ?? -1
       logger.debug(
-        "👋 DIVINA reader disappeared for book \(currentBookId), currentPage=\(viewModel.currentPage?.number ?? -1), totalPages=\(viewModel.pageCount)"
+        "👋 DIVINA reader disappeared for book \(currentBookId), currentPage=\(currentPageNumber), totalPages=\(viewModel.pageCount)"
       )
       tapZoneOverlayTimer?.invalidate()
       keyboardHelpTimer?.invalidate()
@@ -770,7 +833,7 @@ struct DivinaReaderView: View {
               )
             #endif
           } else {
-            switch pageTransitionStyle {
+            switch effectiveTransitionStyle {
             case .pageCurl:
               #if os(iOS)
                 if useDualPage {
@@ -813,7 +876,10 @@ struct DivinaReaderView: View {
                 viewModel: viewModel,
                 readListContext: readListContext,
                 onDismiss: { closeReader() },
-                onTapZoneTap: handleTapZoneTap
+                onTapZoneTap: handleTapZoneTap,
+                panelZoomController: panelModeController.zoomController,
+                panelModeEngaged: panelModeController.engaged,
+                onPanelDoubleTap: handlePanelDoubleTap
               )
             }
           }
@@ -822,6 +888,7 @@ struct DivinaReaderView: View {
         .id(contentKey)
         .onChange(of: viewModel.currentReaderPage?.id) { _, _ in
           updateHandoff()
+          refreshPanelModeCurrentPage()
           #if os(iOS)
             updateReaderLiveActivityProgress()
           #endif
@@ -1740,7 +1807,9 @@ struct DivinaReaderView: View {
   }
 
   private func handleTapZoneAction(_ action: TapZoneAction) {
-    guard viewModel.hasPages, !isPresentingModalSheet, !viewModel.isZoomed else { return }
+    guard viewModel.hasPages, !isPresentingModalSheet,
+      !viewModel.isZoomed || panelModeController.engaged
+    else { return }
     switch action {
     case .previous:
       goToReaderPosition(.previous)
@@ -1753,6 +1822,20 @@ struct DivinaReaderView: View {
 
   private func goToReaderPosition(_ step: ReaderNavigationStep) {
     guard viewModel.hasPages else { return }
+    // While panel-walking, forward/back steps panels — tap, keyboard, and tvOS remote all
+    // funnel through here. Gated on `engaged`, so vertical (which shares the paged branch
+    // below) is never affected. A bookend step delegates the page turn to the host nav.
+    if panelModeController.engaged {
+      let forward: Bool
+      switch step {
+      case .next: forward = true
+      case .previous: forward = false
+      }
+      if case .turnPage(let turnForward) = panelModeController.step(forward: forward) {
+        goToPagedReaderPosition(turnForward ? .next : .previous)
+      }
+      return
+    }
     switch readingDirection {
     case .ltr, .rtl, .vertical:
       goToPagedReaderPosition(step)

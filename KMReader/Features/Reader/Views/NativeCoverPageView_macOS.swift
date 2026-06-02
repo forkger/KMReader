@@ -44,6 +44,9 @@
     let readListContext: ReaderReadListContext?
     let onDismiss: () -> Void
     let onTapZoneTap: ReaderTapZoneTapHandler
+    let panelZoomController: PanelZoomController
+    let panelModeEngaged: Bool
+    let onPanelDoubleTap: (CGPoint?) -> Void
 
     func makeCoordinator() -> Coordinator {
       Coordinator(self)
@@ -56,12 +59,14 @@
       }
       context.coordinator.attach(to: containerView)
       context.coordinator.update(from: self)
+      panelZoomController.target = context.coordinator
       return containerView
     }
 
     func updateNSView(_ nsView: NativeCoverContainerView, context: Context) {
       context.coordinator.attach(to: nsView)
       context.coordinator.update(from: self)
+      panelZoomController.target = context.coordinator
     }
 
     static func dismantleNSView(_ nsView: NativeCoverContainerView, coordinator: Coordinator) {
@@ -70,7 +75,9 @@
     }
 
     @MainActor
-    final class Coordinator: NSObject, NSGestureRecognizerDelegate, NativePagedPagePresentationHost {
+    final class Coordinator: NSObject, NSGestureRecognizerDelegate, NativePagedPagePresentationHost,
+      PanelZoomCommandHandling
+    {
       private enum TransitionAnimationKind {
         case gesture
         case tapNavigation
@@ -139,6 +146,7 @@
       }
 
       func teardown() {
+        parent.panelZoomController.clearTarget(self)
         postTransitionTask?.cancel()
         postTransitionTask = nil
         if let panRecognizer {
@@ -180,6 +188,23 @@
       func hasVisiblePagePresentationContent() -> Bool {
         guard let containerView else { return false }
         return containerView.slotViews.contains(where: { !$0.isHidden && $0.item != nil })
+      }
+
+      // MARK: - PanelZoomCommandHandling (panel mode drives zoom on the front slot)
+
+      func zoomToPanelRect(_ rect: PanelRect, animated: Bool) {
+        frontSlotView?.zoomToPanelRect(rect, animated: animated)
+      }
+
+      func resetPanelZoomToFit(animated: Bool) {
+        frontSlotView?.resetPanelZoomToFit(animated: animated)
+      }
+
+      private var frontSlotView: NativeCoverSlotView? {
+        guard let containerView else { return nil }
+        let slots = containerView.slotViews
+        guard slots.indices.contains(deckState.frontSlotIndex) else { return nil }
+        return slots[deckState.frontSlotIndex]
       }
 
       func applyPagePresentationInvalidation(_ invalidation: ReaderPagePresentationInvalidation) {
@@ -877,6 +902,10 @@
       @objc private func handleDoubleClick(_ recognizer: NSClickGestureRecognizer) {
         singleClickWorkItem?.cancel()
         singleClickWorkItem = nil
+        // Panel mode owns the double-click (engage / disengage), outside the tap-zone system.
+        guard parent.renderConfig.panelMode, let containerView else { return }
+        let location = recognizer.location(in: containerView)
+        parent.onPanelDoubleTap(frontSlotView?.normalizedImagePoint(forContainerPoint: location))
       }
 
       @objc private func handleLongPress(_ recognizer: NSPressGestureRecognizer) {
@@ -897,7 +926,8 @@
       }
 
       private var isTapZoneSuppressed: Bool {
-        parent.viewModel.isZoomed
+        // Engaged panel mode is zoomed by definition; do not let that suppress stepping.
+        (parent.viewModel.isZoomed && !parent.panelModeEngaged)
           || isUserPanning
           || isAnimatingTransition
           || isLongPressing
