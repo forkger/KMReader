@@ -51,11 +51,23 @@ final class PanelModeController {
 
     /// Called by the reader whenever the displayed page changes (armed or engaged).
     /// Eager-fetches the sequence; if a page turn is pending, lands the cursor on the
-    /// whole-page bookend of the freshly turned-to page.
-    func updateCurrentPage(bookId: String, page: BookPage, direction: ReadingDirection) async {
+    /// whole-page bookend of the freshly turned-to page. `adjacentPages` are the
+    /// same-segment neighbors to lazy-warm so a page turn lands on a ready sequence.
+    func updateCurrentPage(
+        bookId: String,
+        page: BookPage,
+        direction: ReadingDirection,
+        adjacentPages: [BookPage] = []
+    ) async {
         currentBookId = bookId
         currentPage = page
         currentDirection = direction
+
+        // Eager-warm this page (`.userInitiated`) + lazy-warm neighbors (`.utility`), and
+        // cancel detection that fell outside the new window. The `sequence` await below
+        // reuses the in-flight current-page task (per-page dedup), so it is not computed twice.
+        orchestrator.handlePageChange(
+            bookId: bookId, currentPage: page, adjacentPages: adjacentPages, direction: direction)
 
         let resolved = await orchestrator.sequence(bookId: bookId, page: page, direction: direction)
 
@@ -96,6 +108,13 @@ final class PanelModeController {
         pendingTurnForward = nil
         cursor = 0
         zoomController.resetToFit(animated: true)
+    }
+
+    /// Panel mode fully turned off (not merely disengaged): exit engaged and cancel all
+    /// in-flight detection so lazy-lookahead tasks do not outlive the mode.
+    func deactivate() {
+        disengage()
+        orchestrator.cancelAll()
     }
 
     /// Toggle engage/disengage at a point (the double-tap gesture).

@@ -183,9 +183,20 @@ struct DivinaReaderView: View {
     else { return }
     let bookId = readerPage.bookId
     let direction = readingDirection
+    // Same-segment ±1 neighbors for lazy lookahead. Cross-segment neighbors are skipped:
+    // the orchestrator keys detection by bookId, and a cross-book turn already incurs a
+    // book load that masks detection latency.
+    var adjacentPages: [BookPage] = []
+    for offset in [-1, 1] {
+      if let item = viewModel.adjacentViewItem(offset: offset),
+        item.pageID.bookId == bookId,
+        let page = viewModel.page(for: item.pageID) {
+        adjacentPages.append(page)
+      }
+    }
     Task {
       await panelModeController.updateCurrentPage(
-        bookId: bookId, page: bookPage, direction: direction)
+        bookId: bookId, page: bookPage, direction: direction, adjacentPages: adjacentPages)
     }
   }
 
@@ -199,7 +210,7 @@ struct DivinaReaderView: View {
       applyPanelModeSinglePageForcing()
       refreshPanelModeCurrentPage()
     } else {
-      panelModeController.disengage()
+      panelModeController.deactivate()
       if let saved = savedPageLayoutBeforeEngage, pageLayout != saved { pageLayout = saved }
       if let saved = savedSplitWideBeforeEngage, splitWidePageMode != saved {
         splitWidePageMode = saved
