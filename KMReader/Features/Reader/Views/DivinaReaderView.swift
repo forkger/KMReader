@@ -196,10 +196,7 @@ struct DivinaReaderView: View {
   private func handlePanelModeEnabledChange() {
     AppConfig.setPanelMode(panelModeEnabled, for: currentBookId)
     if panelModeActive {
-      savedPageLayoutBeforeEngage = pageLayout
-      savedSplitWideBeforeEngage = splitWidePageMode
-      if pageLayout != .single { pageLayout = .single }
-      if splitWidePageMode != .none { splitWidePageMode = .none }
+      applyPanelModeSinglePageForcing()
       refreshPanelModeCurrentPage()
     } else {
       panelModeController.disengage()
@@ -210,6 +207,18 @@ struct DivinaReaderView: View {
       savedPageLayoutBeforeEngage = nil
       savedSplitWideBeforeEngage = nil
     }
+  }
+
+  /// Snapshot the user's layout (once) and pin single-page presentation for as long as
+  /// panel mode is active. Idempotent: the `nil` guard means the snapshot is taken only on
+  /// the first call, so running this on both the toggle path and the load path (reopening a
+  /// book already in panel mode, where `onChange(of: panelModeEnabled)` never fires) cannot
+  /// clobber the saved values with the already-forced `.single`/`.none`.
+  private func applyPanelModeSinglePageForcing() {
+    if savedPageLayoutBeforeEngage == nil { savedPageLayoutBeforeEngage = pageLayout }
+    if savedSplitWideBeforeEngage == nil { savedSplitWideBeforeEngage = splitWidePageMode }
+    if pageLayout != .single { pageLayout = .single }
+    if splitWidePageMode != .none { splitWidePageMode = .none }
   }
 
   /// The cover engine reports a panel-mode double-tap here (image-normalized point);
@@ -731,6 +740,11 @@ struct DivinaReaderView: View {
       await loadBook(bookId: currentBookId, preserveReaderOptions: preserveReaderOptions)
       preserveReaderOptions = false
       refreshPanelModeCurrentPage()
+      // Reopening a book already in panel mode does not fire `onChange(of: panelModeEnabled)`
+      // (the value is initialized, not transitioned), so force single-page here too. Without
+      // this a dual-page/split-wide book would render a spread while panel rects are detected
+      // in single-page space, landing the zoom on the wrong region.
+      if panelModeActive { applyPanelModeSinglePageForcing() }
     }
     .onChange(of: currentBook?.id) { _, _ in
       updateHandoff()
