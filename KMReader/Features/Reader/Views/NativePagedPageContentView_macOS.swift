@@ -212,7 +212,11 @@
       let flipped = documentView?.isFlipped ?? false
       let center = CGPoint(x: centerX, y: flipped ? centerYTopDown : docHeight - centerYTopDown)
       if animated {
-        scrollView.animator().setMagnification(clamped, centeredAt: center)
+        NSAnimationContext.runAnimationGroup { context in
+          context.duration = PanelZoomTuning.stepDuration
+          context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+          scrollView.animator().setMagnification(clamped, centeredAt: center)
+        }
       } else {
         scrollView.setMagnification(clamped, centeredAt: center)
       }
@@ -225,7 +229,11 @@
     func resetPanelZoomToFit(animated: Bool) {
       guard scrollView.magnification != scrollView.minMagnification else { return }
       if animated {
-        scrollView.animator().magnification = scrollView.minMagnification
+        NSAnimationContext.runAnimationGroup { context in
+          context.duration = PanelZoomTuning.stepDuration
+          context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+          scrollView.animator().magnification = scrollView.minMagnification
+        }
         if tracksGlobalZoomState, let viewModel, viewModel.isZoomed {
           viewModel.isZoomed = false
         }

@@ -233,14 +233,33 @@
         width: max(panel.width * fitted.width, 1),
         height: max(panel.height * fitted.height, 1)
       )
-      scrollView.zoom(to: target, animated: animated)
+      if animated {
+        // UIScrollView.zoom(to:animated:) has a fixed ~0.3s duration. Drive a non-animated
+        // zoom inside an explicit animation block so the panel-walk step uses the tunable
+        // PanelZoomTuning.stepDuration instead.
+        UIView.animate(
+          withDuration: PanelZoomTuning.stepDuration,
+          delay: 0,
+          options: [.curveEaseInOut, .beginFromCurrentState]
+        ) {
+          self.scrollView.zoom(to: target, animated: false)
+        }
+      } else {
+        scrollView.zoom(to: target, animated: false)
+      }
     }
 
     /// Reset back to the whole, fitted page.
     func resetPanelZoomToFit(animated: Bool) {
       guard scrollView.zoomScale != scrollView.minimumZoomScale else { return }
       if animated {
-        scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
+        UIView.animate(
+          withDuration: PanelZoomTuning.stepDuration,
+          delay: 0,
+          options: [.curveEaseInOut, .beginFromCurrentState]
+        ) {
+          self.scrollView.setZoomScale(self.scrollView.minimumZoomScale, animated: false)
+        }
       } else {
         forceResetZoom()
         if tracksGlobalZoomState, let viewModel, viewModel.isZoomed {

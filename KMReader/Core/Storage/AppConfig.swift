@@ -1007,6 +1007,20 @@ enum AppConfig {
     }
   }
 
+  /// Duration (seconds) of an animated panel-walk zoom step in panel mode. Clamped to
+  /// 0.3...0.5 so a stored value can never fall outside the slider's range.
+  static nonisolated var panelZoomDuration: Double {
+    get {
+      guard UserDefaults.standard.object(forKey: "panelZoomDuration") != nil else {
+        return 0.4
+      }
+      return min(max(UserDefaults.standard.double(forKey: "panelZoomDuration"), 0.3), 0.5)
+    }
+    set {
+      UserDefaults.standard.set(min(max(newValue, 0.3), 0.5), forKey: "panelZoomDuration")
+    }
+  }
+
   static nonisolated var doubleTapZoomMode: DoubleTapZoomMode {
     get {
       if let stored = UserDefaults.standard.string(forKey: "doubleTapZoomMode"),
