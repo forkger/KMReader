@@ -26,7 +26,7 @@ enum PanelStepOutcome: Equatable {
 @Observable
 final class PanelModeController {
     /// Actively panel-walking — the host-facing `panelModeEngaged` signal that gates
-    /// `.cover` pinning, the single-page invariant, and the Phase-D carve-outs.
+    /// `.cover` pinning, the single-page invariant, and the zoom-guard carve-outs.
     private(set) var engaged = false
 
     /// Owned here and exposed so the host can bind its `target` to the cover coordinator.

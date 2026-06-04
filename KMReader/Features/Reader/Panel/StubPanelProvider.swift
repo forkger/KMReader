@@ -8,7 +8,7 @@ import Foundation
 
 /// Deterministic stub conforming to PanelDetectionProvider.
 /// Returns a synthetic 2×3 panel grid (mirrored for RTL); landscape images return .empty.
-/// Sleeps for `latency` before returning so Phase B can exercise cancellation and stale-drop.
+/// Sleeps for `latency` before returning so callers can exercise cancellation and stale-drop.
 struct StubPanelProvider: PanelDetectionProvider {
     let latency: Duration
     let isEmptyPage: @Sendable (CGImage) -> Bool
