@@ -304,10 +304,8 @@
           logger.debug(
             "👋 EPUB reader disappeared for book \(handoffBookId), chapter=\(viewModel.currentChapterIndex), page=\(viewModel.currentPageIndex), hasLocation=\(viewModel.currentLocation != nil)"
           )
-          readerPresentation.clearFlushHandler(for: sessionID)
           #if os(macOS)
             keyboardHelpTimer?.invalidate()
-            readerPresentation.clearReaderCommands()
           #endif
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in

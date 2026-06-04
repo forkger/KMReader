@@ -29,6 +29,7 @@
     private var isPlaybackActive = false
     private var tracksGlobalZoomState = true
     private var isUpdatingZoomState = false
+    private var lastLayoutBoundsSize: CGSize = .zero
 
     override init(frame: CGRect) {
       super.init(frame: frame)
@@ -41,6 +42,7 @@
 
     override func layoutSubviews() {
       super.layoutSubviews()
+      resetViewportStateIfNeeded()
       updatePages()
     }
 
@@ -104,6 +106,7 @@
       currentScreenSize = .zero
       isPlaybackActive = false
       tracksGlobalZoomState = true
+      lastLayoutBoundsSize = .zero
       if let backgroundColor {
         self.backgroundColor = backgroundColor
         scrollView.backgroundColor = backgroundColor
@@ -197,13 +200,25 @@
     }
 
     private func resetZoomState() {
+      resetScrollViewportState()
+
+      guard tracksGlobalZoomState, let viewModel, viewModel.isZoomed else { return }
+      viewModel.isZoomed = false
+    }
+
+    private func resetViewportStateIfNeeded() {
+      let size = bounds.size
+      guard size.width > 0, size.height > 0 else { return }
+      guard size != lastLayoutBoundsSize else { return }
+      lastLayoutBoundsSize = size
+      resetZoomState()
+    }
+
+    private func resetScrollViewportState() {
       isUpdatingZoomState = true
       scrollView.setZoomScale(scrollView.minimumZoomScale, animated: false)
       scrollView.contentOffset = .zero
       isUpdatingZoomState = false
-
-      guard tracksGlobalZoomState, let viewModel, viewModel.isZoomed else { return }
-      viewModel.isZoomed = false
     }
 
     // Reset this slot's scroll view to minimum scale unconditionally, independent
@@ -211,11 +226,7 @@
     // a stale scale left on a slot that was zoomed while a page transition was in
     // flight. Uses isUpdatingZoomState so it does not re-fire scrollViewDidZoom.
     func forceResetZoom() {
-      guard scrollView.zoomScale != scrollView.minimumZoomScale else { return }
-      isUpdatingZoomState = true
-      scrollView.setZoomScale(scrollView.minimumZoomScale, animated: false)
-      scrollView.contentOffset = .zero
-      isUpdatingZoomState = false
+      resetScrollViewportState()
     }
 
     // MARK: - Panel mode zoom (driven by PanelZoomController via the cover coordinator)

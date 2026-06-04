@@ -194,10 +194,8 @@
           "👋 PDF reader disappeared for book \(book.id), page=\(viewModel.currentPageNumber)/\(viewModel.pageCount)"
         )
         showingControls = false
-        readerPresentation.clearFlushHandler(for: sessionID)
         #if os(macOS)
           hideKeyboardHelp()
-          readerPresentation.clearReaderCommands()
         #endif
       }
       .onChange(of: scenePhase) { oldPhase, newPhase in

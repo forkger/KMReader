@@ -49248,70 +49248,6 @@
         }
       }
     },
-    "Opt for single page, auto-detected spreads, or forced dual pages (landscape only)" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wählen Sie zwischen Einzelseite, automatisch erkannten Doppelseiten oder erzwungenen Doppelseiten (nur Querformat)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opt for single page, auto-detected spreads, or forced dual pages (landscape only)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige pagina unica, dobles paginas detectadas automaticamente o doble pagina forzada (solo horizontal)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisissez page unique, doubles pages détectées automatiquement ou double page forcée (paysage uniquement)"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scegli pagina singola, doppie pagine rilevate automaticamente o doppia pagina forzata (solo orizzontale)"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "単ページ、自動見開き、強制見開き（横向きのみ）を選択"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "단일 페이지, 자동 감지 펼침 또는 강제 듀얼 페이지(가로 전용) 중 선택"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите одиночную страницу, автопределяемые развороты или принудительный двойной режим (только альбомный)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择单页、自动跨页或强制双页（仅横屏）"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選擇單頁、自動跨頁或強制雙頁（僅橫向）"
-          }
-        }
-      }
-    },
     "Ordered" : {
       "localizations" : {
         "de" : {
@@ -54370,6 +54306,70 @@
         }
       }
     },
+    "reader.pageLayout.auto.detail" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paart nur Seiten, deren Größe zeigt, dass sie für Doppelseiten geeignet sind."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pairs pages only when page size confirms they are suitable for spreads."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empareja páginas solo cuando su tamaño confirma que son adecuadas para dobles páginas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associe les pages uniquement lorsque leur taille confirme qu'elles conviennent aux doubles pages."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbina le pagine solo quando le dimensioni confermano che sono adatte alle doppie pagine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ページサイズから見開きに適していると確認できる場合のみページを組み合わせます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페이지 크기로 펼침 보기에 적합하다고 확인될 때만 페이지를 짝지어 표시합니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объединяет страницы только когда их размер подтверждает пригодность для разворота."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅在页面尺寸确认适合双页显示时才配对页面。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只有在頁面尺寸確認適合雙頁顯示時才會配對頁面。"
+          }
+        }
+      }
+    },
     "reader.pageLayout.dual" : {
       "localizations" : {
         "de" : {
@@ -54434,6 +54434,70 @@
         }
       }
     },
+    "reader.pageLayout.dual.detail" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erzwingt Doppelseiten und trennt nur Seiten, die eindeutig Querformat oder breit sind."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forces two-page spreads, separating only pages known to be landscape or wide."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuerza dobles páginas y separa solo las páginas que se sabe que son horizontales o anchas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Force les doubles pages et sépare uniquement les pages reconnues comme paysage ou larges."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forza le doppie pagine, separando solo le pagine note come orizzontali o larghe."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2ページ見開きを強制し、横向きまたは幅広と判明しているページだけを分離します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "두 페이지 펼침을 강제하며, 가로형 또는 넓은 페이지로 확인된 경우에만 분리합니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Принудительно включает развороты, отделяя только страницы, которые точно альбомные или широкие."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "强制双页显示，只会拆开已知为横向或宽页的页面。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強制雙頁顯示，只會拆開已知為橫向或寬頁的頁面。"
+          }
+        }
+      }
+    },
     "reader.pageLayout.single" : {
       "localizations" : {
         "de" : {
@@ -54494,6 +54558,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "單頁"
+          }
+        }
+      }
+    },
+    "reader.pageLayout.single.detail" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Immer eine Seite pro Ansicht anzeigen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always show one page at a time."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar siempre una página a la vez."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toujours afficher une page à la fois."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra sempre una pagina alla volta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "常に1ページずつ表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "항상 한 번에 한 페이지씩 표시합니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всегда показывать по одной странице."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "始终一次显示一页。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一律一次顯示一頁。"
           }
         }
       }
@@ -55138,70 +55266,6 @@
         }
       }
     },
-    "reader.tapZoneMode.tSplit" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T-Form"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T-Split"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forma de T"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forme en T"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forma a T"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T字型"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T자형"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Т-образный"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T 形"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "T 形"
-          }
-        }
-      }
-    },
     "reader.tapZoneMode.none" : {
       "localizations" : {
         "de" : {
@@ -55262,6 +55326,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "禁用"
+          }
+        }
+      }
+    },
+    "reader.tapZoneMode.tSplit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T-Form"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T-Split"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forma de T"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forme en T"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forma a T"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T字型"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T자형"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Т-образный"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T 形"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T 形"
           }
         }
       }
