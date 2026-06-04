@@ -18,6 +18,7 @@ struct ReaderSettingsSheet: View {
   @AppStorage("showPageShadow") private var showPageShadow: Bool = AppConfig.showPageShadow
   @AppStorage("doubleTapZoomScale") private var doubleTapZoomScale: Double = 3.0
   @AppStorage("panelZoomDuration") private var panelZoomDuration: Double = 0.4
+  @AppStorage("panelZoomFillFactor") private var panelZoomFillFactor: Double = 0.9
   @AppStorage("doubleTapZoomMode") private var doubleTapZoomMode: DoubleTapZoomMode = .fast
   @AppStorage("pageTransitionStyle") private var pageTransitionStyle: PageTransitionStyle = .cover
   @AppStorage("tapZoneMode") private var tapZoneMode: TapZoneMode = .defaultLayout
@@ -195,6 +196,19 @@ struct ReaderSettingsSheet: View {
               Slider(
                 value: $panelZoomDuration,
                 in: 0.3...0.5,
+                step: 0.05
+              )
+            }
+            VStack(alignment: .leading, spacing: 8) {
+              HStack {
+                Text("Panel Zoom Fill")
+                Spacer()
+                Text(String(format: "%.0f%%", panelZoomFillFactor * 100))
+                  .foregroundColor(.secondary)
+              }
+              Slider(
+                value: $panelZoomFillFactor,
+                in: 0.75...1.0,
                 step: 0.05
               )
             }

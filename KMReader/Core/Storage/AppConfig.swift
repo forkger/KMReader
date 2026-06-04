@@ -1021,6 +1021,20 @@ enum AppConfig {
     }
   }
 
+  /// Fraction of the viewport a focused panel fills in panel mode; the remainder shows neighbor
+  /// context. Clamped to 0.75...1.0 so a stored value can never fall outside the slider's range.
+  static nonisolated var panelZoomFillFactor: Double {
+    get {
+      guard UserDefaults.standard.object(forKey: "panelZoomFillFactor") != nil else {
+        return 0.9
+      }
+      return min(max(UserDefaults.standard.double(forKey: "panelZoomFillFactor"), 0.75), 1.0)
+    }
+    set {
+      UserDefaults.standard.set(min(max(newValue, 0.75), 1.0), forKey: "panelZoomFillFactor")
+    }
+  }
+
   static nonisolated var doubleTapZoomMode: DoubleTapZoomMode {
     get {
       if let stored = UserDefaults.standard.string(forKey: "doubleTapZoomMode"),
