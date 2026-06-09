@@ -8,6 +8,7 @@ import SwiftUI
 struct DivinaControlsOverlayView: View {
   @Binding var readingDirection: ReadingDirection
   @Binding var pageLayout: PageLayout
+  @Binding var panelModeEnabled: Bool
   @Binding var isolateCoverPage: Bool
   @Binding var splitWidePageMode: SplitWidePageMode
 
@@ -396,6 +397,21 @@ struct DivinaControlsOverlayView: View {
           }
         } label: {
           Label(String(localized: "Page Layout"), systemImage: pageLayout.icon)
+        }
+        .pickerStyle(.menu)
+      }
+
+      if readingDirection == .ltr || readingDirection == .rtl {
+        // Submenu picker (not a plain Toggle, whose leading checkmark column shifts the whole menu
+        // sideways when on). Opens like Reading Direction / Page Layout, with On/Off inside.
+        Picker(selection: $panelModeEnabled) {
+          Label(String(localized: "On"), systemImage: "rectangle.split.2x2.fill").tag(true)
+          Label(String(localized: "Off"), systemImage: "rectangle.split.2x2").tag(false)
+        } label: {
+          Label(
+            String(localized: "Panel Mode"),
+            systemImage: panelModeEnabled ? "rectangle.split.2x2.fill" : "rectangle.split.2x2"
+          )
         }
         .pickerStyle(.menu)
       }

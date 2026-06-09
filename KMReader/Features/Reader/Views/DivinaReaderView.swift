@@ -1013,6 +1013,7 @@ struct DivinaReaderView: View {
     DivinaControlsOverlayView(
       readingDirection: $readingDirection,
       pageLayout: $pageLayout,
+      panelModeEnabled: $panelModeEnabled,
       isolateCoverPage: $isolateCoverPage,
       splitWidePageMode: $splitWidePageMode,
       showingPageJumpSheet: $showingPageJumpSheet,
