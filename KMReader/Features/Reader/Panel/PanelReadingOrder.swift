@@ -27,6 +27,11 @@ nonisolated enum PanelReadingOrder {
     /// tested, so a small overhang is forgiven instead of defeating the cut and dropping the
     /// page to the less-accurate banded fallback.
     static let defaultOverlapTolerance: Double = 0.02
+    /// Top-edge slack for grouping boxes into a "row" in the no-clean-cut fallback. Wider than
+    /// the cut tolerance because side-by-side panels in one row often have top edges a few percent
+    /// apart (different heights/art); too tight and a real horizontal pair splits into two rows and
+    /// loses its right-to-left order.
+    static let fallbackRowEpsilon: Double = 0.05
 
     static func ordered(
         _ rects: [PanelRect],
@@ -56,7 +61,7 @@ nonisolated enum PanelReadingOrder {
                 + ordered(second, direction: direction, gutter: gutter, overlapTolerance: overlapTolerance)
         }
 
-        return fallbackSorted(rects, direction: direction, rowEpsilon: max(gutter, overlapTolerance))
+        return fallbackSorted(rects, direction: direction, rowEpsilon: fallbackRowEpsilon)
     }
 
     // MARK: - Private
@@ -95,17 +100,19 @@ nonisolated enum PanelReadingOrder {
         return (Array(sorted[0..<idx]), Array(sorted[idx...]))
     }
 
-    /// Deterministic order for pages with no clean cut: band by vertical center, then
-    /// order within a band by horizontal center (reversed for RTL).
+    /// Deterministic order for pages with no clean cut: band by TOP EDGE (rows), then order
+    /// within a row by horizontal center (reversed for RTL). Banding by the top edge rather
+    /// than the vertical center is what keeps a tall, full-height panel grouped with the
+    /// shorter panels it shares a row-start with — otherwise its center sits mid-page and it
+    /// sorts below them, breaking the right-to-left order of the top row (e.g. a full-height
+    /// right column ordered after the top-left panel).
     private static func fallbackSorted(
         _ rects: [PanelRect],
         direction: ReadingDirection,
         rowEpsilon: Double
     ) -> [PanelRect] {
         rects.sorted { a, b in
-            let aMidY = a.y + a.height / 2
-            let bMidY = b.y + b.height / 2
-            if abs(aMidY - bMidY) > rowEpsilon { return aMidY < bMidY }
+            if abs(a.y - b.y) > rowEpsilon { return a.y < b.y }
             let aMidX = a.x + a.width / 2
             let bMidX = b.x + b.width / 2
             return direction == .rtl ? aMidX > bMidX : aMidX < bMidX
