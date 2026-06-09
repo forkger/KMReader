@@ -17,7 +17,6 @@ struct ReaderSettingsSheet: View {
   @AppStorage("showPageNumber") private var showPageNumber: Bool = true
   @AppStorage("showPageShadow") private var showPageShadow: Bool = AppConfig.showPageShadow
   @AppStorage("doubleTapZoomScale") private var doubleTapZoomScale: Double = 3.0
-  @AppStorage("panelZoomDuration") private var panelZoomDuration: Double = 0.4
   @AppStorage("panelZoomFillFactor") private var panelZoomFillFactor: Double = 0.9
   @AppStorage("doubleTapZoomMode") private var doubleTapZoomMode: DoubleTapZoomMode = .fast
   @AppStorage("pageTransitionStyle") private var pageTransitionStyle: PageTransitionStyle = .cover
@@ -179,26 +178,8 @@ struct ReaderSettingsSheet: View {
           #endif
         }
 
-        Section(header: Text("Panel Mode")) {
-          Toggle(isOn: $panelModeEnabled) {
-            Text("Panel Mode")
-          }
-          .disabled(!(readingDirection == .ltr || readingDirection == .rtl))
-
-          if panelModeEnabled {
-            VStack(alignment: .leading, spacing: 8) {
-              HStack {
-                Text("Panel Animation Duration")
-                Spacer()
-                Text(String(format: "%.2fs", panelZoomDuration))
-                  .foregroundColor(.secondary)
-              }
-              Slider(
-                value: $panelZoomDuration,
-                in: 0.3...0.5,
-                step: 0.05
-              )
-            }
+        if panelModeEnabled {
+          Section(header: Text("Panel Mode")) {
             VStack(alignment: .leading, spacing: 8) {
               HStack {
                 Text("Panel Zoom Fill")
