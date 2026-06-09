@@ -616,6 +616,10 @@ struct DivinaReaderView: View {
     }
   #endif
 
+  private var readerIsReadyForHints: Bool {
+    viewModel.hasPages && !viewModel.isLoading
+  }
+
   var body: some View {
     GeometryReader { geometry in
       let screenSize = geometry.size
@@ -769,7 +773,16 @@ struct DivinaReaderView: View {
       readerPresentation.updatePresentedBook(sessionID: sessionID, book: newBook)
     }
     .onChange(of: viewModel.pageCount) { oldCount, newCount in
-      if oldCount == 0 && newCount > 0 {
+      if oldCount == 0 && newCount > 0 && readerIsReadyForHints {
+        triggerTapZoneOverlay(timeout: 1)
+        triggerKeyboardHelp(timeout: 1.5)
+      }
+    }
+    .onChange(of: viewModel.isLoading) { _, isLoading in
+      if isLoading {
+        hideTapZoneOverlay()
+        hideKeyboardHelp()
+      } else if readerIsReadyForHints {
         triggerTapZoneOverlay(timeout: 1)
         triggerKeyboardHelp(timeout: 1.5)
       }
@@ -832,7 +845,13 @@ struct DivinaReaderView: View {
   ) -> some View {
     let contentKey = readerContentKey(useDualPage: useDualPage)
     Group {
-      if viewModel.hasPages {
+      if viewModel.isLoading {
+        ReaderLoadingView(
+          title: viewModel.loadingTitle,
+          detail: viewModel.loadingDetail,
+          progress: viewModel.loadingProgress
+        )
+      } else if viewModel.hasPages {
         Group {
           if readingDirection == .webtoon {
             #if os(iOS) || os(macOS)
@@ -938,12 +957,6 @@ struct DivinaReaderView: View {
             }
           }
         #endif
-      } else if viewModel.isLoading {
-        ReaderLoadingView(
-          title: viewModel.loadingTitle,
-          detail: viewModel.loadingDetail,
-          progress: viewModel.loadingProgress
-        )
       } else {
         NoPagesView(onDismiss: { closeReader() })
       }
@@ -1987,9 +2000,10 @@ struct DivinaReaderView: View {
   /// Show reader helper overlay (Tap zones on iOS, keyboard help on macOS)
   private func triggerTapZoneOverlay(timeout: TimeInterval) {
     // Respect user preference and ensure we have content
-    guard showTapZoneHints, viewModel.hasPages else { return }
+    guard showTapZoneHints, readerIsReadyForHints else { return }
 
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+      guard self.readerIsReadyForHints else { return }
       withAnimation {
         self.showTapZoneOverlay = true
       }
@@ -2027,10 +2041,11 @@ struct DivinaReaderView: View {
   /// Show keyboard help overlay
   private func triggerKeyboardHelp(timeout: TimeInterval) {
     // Respect user preference and ensure we have content
-    guard showKeyboardHelpOverlay, viewModel.hasPages else { return }
+    guard showKeyboardHelpOverlay, readerIsReadyForHints else { return }
     guard ReaderKeyboardAvailability.shouldAutoShowKeyboardHelp else { return }
 
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+      guard self.readerIsReadyForHints else { return }
       withAnimation {
         self.showKeyboardHelp = true
       }
