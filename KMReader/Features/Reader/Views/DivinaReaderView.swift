@@ -620,7 +620,7 @@ struct DivinaReaderView: View {
     viewModel.hasPages && !viewModel.isLoading
   }
 
-  var body: some View {
+  private var readerBody: some View {
     GeometryReader { geometry in
       let screenSize = geometry.size
       let screenKey = screenKey(screenSize: screenSize)
@@ -765,6 +765,10 @@ struct DivinaReaderView: View {
       // in single-page space, landing the zoom on the wrong region.
       if panelModeActive { applyPanelModeSinglePageForcing() }
     }
+  }
+
+  var body: some View {
+    readerBody
     .onChange(of: currentBook?.id) { _, _ in
       updateHandoff()
     }
